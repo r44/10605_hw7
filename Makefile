@@ -10,11 +10,10 @@ OUTPUTH=./h.csv
 LOG1=./spark_dsgd.log
 LOG2=./eval_acc.log
 
-#NUM_FACTOR=20
 NUM_FACTOR=20
 NUM_WORKER=5
 NUM_ITER=100
-BETA=0.9
+BETA=0.43125
 LAMBDA=0.1
 
 SPARKPATH=/usr/local/Cellar/spark-1.3.0-bin-hadoop2.4/bin/
@@ -23,6 +22,7 @@ MAIN=dsgd_mf.py
 
 val:
 		python eval2.pyc $(LOG2) $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH) > $(LOG1)
+		python eval_acc.py tmp $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH)  
 eval:
 		python eval_acc.py tmp $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH)  
 
