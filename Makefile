@@ -24,7 +24,7 @@ MAIN=dsgd_mf.py
 val:
 		python eval2.pyc $(LOG2) $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH) > $(LOG1)
 eval:
-		python eval_acc.py $(LOG2) $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH)  
+		python eval_acc.py tmp $(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TRAINV) $(OUTPUTW) $(OUTPUTH)  
 
 test:
 	$(SPARK) $(MAIN) $(NUM_FACTOR) $(NUM_WORKER) $(NUM_ITER) $(BETA) $(LAMBDA) $(TESTV) $(OUTPUTW) $(OUTPUTH)  
