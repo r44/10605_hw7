@@ -7,25 +7,25 @@ Analyzing your memory usage and Efficiency..
 
 testing  1
 
-time (s): 52.3411421776
-memory (byte): 404099072
+time (s): 56.6135489941
+memory (byte): 440881152
 testing  2
 
-time (s): 46.0918729305
-memory (byte): 470929408
+time (s): 51.2559990883
+memory (byte): 440881152
 testing  3
 
-time (s): 44.4499111176
-memory (byte): 470929408
+time (s): 56.5221099854
+memory (byte): 440881152
 testing  4
 
-time (s): 43.1509799957
-memory (byte): 484212736
+time (s): 54.4210588932
+memory (byte): 440881152
 testing  5
 
-time (s): 45.1339330673
-memory (byte): 484212736
+time (s): 53.8076989651
+memory (byte): 440881152
 
 
-average time usage (s): 46.2335678577
-average memory usage (byte): 462876672
+average time usage (s): 54.5240831852
+average memory usage (byte): 440881152

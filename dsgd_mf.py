@@ -22,48 +22,6 @@ def parseInput(line):
     """
     tmp = line.split(",")
     return (int(tmp[0]), int(tmp[1]), float(tmp[2]))
-    #return (int(tmp[1]), int(tmp[0]), float(tmp[2]))  ## only for autolab_train!
-
-def parseInputNetflix(line):
-    """
-    Parse each row into (mid, uid, rate) format.
-    """
-    tmp = line[1].split()
-    mid = int(tmp[0][:-1])
-    ret = []
-    for x in tmp[1:]:
-        row = x.split(',')
-        uid = int(row[0])
-        rate = float(row[1])
-        ret.append( (mid, uid, rate) )
-    return ret
-
-def parseInput2MapOfMap(line):
-    """
-    Parse each row into map(mid, map(uid, rate) ) format.
-    """
-    tmp = line[1].split()
-    mid = int(tmp[0][:-1])
-    ret = dict()
-    for x in tmp[1:]:
-        row = x.split(',')
-        uid = int(row[0])
-        rate = float(row[1])
-        ret[uid] = rate
-    return (mid, ret)
-
-def divideBlocks(lst):
-    """
-    Divide a list into numWorker pieces.
-    """
-    ret = []
-    for _ in xrange(numWorker):
-        ret.append([])
-    index = 0
-    while index < len(lst):
-        ret[index%numWorker].append(lst[index])
-        index += 1
-    return ret
 
 def divideSets(lst):
     """
@@ -79,6 +37,13 @@ def divideSets(lst):
     return ret
 
 def buildInvertedIndex(listOfSets):
+    """
+    Build inverted index for mid vs block id.
+    Input:
+        list of [ [mid1, mid2, ...], [mid11, mid12, ...], ... ]
+    Output:
+        { mid1:0, mid2:0, ..., mid11:1, mid12:1, ... }
+    """
     ret = dict()
     for i in xrange(len(listOfSets)):
         for elem in listOfSets[i]:
@@ -86,6 +51,9 @@ def buildInvertedIndex(listOfSets):
     return ret
 
 def writeWandH():
+    """
+    Write the final output for w.csv, h.csv
+    """
     with open(outputWpath, 'wb') as wFile:
         writer = csv.writer(wFile)
         for mid in sorted(wk):
@@ -95,24 +63,6 @@ def writeWandH():
         index = sorted(hk)
         for i in xrange(numFactor):
             writer.writerow([hk[x][i] for x in index])
-
-def countPartitions(id, iterator):
-    c = 0
-    for _ in iterator:
-        c += 1
-    yield (id, c)
-
-def showPartitions(id, iterator):
-    c = []
-    for x in iterator:
-        c.append(x)
-    yield (id, c)
-
-def showPartitions2(id, iterator):
-    c = np.zeros(numFactor)
-    for x in iterator:
-        c += wk[x]
-    yield (id, c)
 
 def main():
     rawData = sc.textFile(inputVpath, numWorker).map(parseInput)
@@ -133,17 +83,6 @@ def main():
     bNJ = sc.broadcast(dict(nJ))
     bLambdaV = sc.broadcast(lambdaV)
     bMBetaV = sc.broadcast(-betaV)
-
-    def showPartitions4(id, iterator):
-        """
-        for debug
-        """
-        ret = []
-        for elem in iterator:
-            if elem[1] in bUserIndex.value[curStrata[id]]:
-                ret.append(elem)
-        yield (id, [ bUserIndex.value[curStrata[id]], ret])
-
     #### Read data and broadcast done. ####
 
     def showStatus(id, iterator):
@@ -163,23 +102,9 @@ def main():
                 ret.append((mid, uid, rating, predict, error, numI.value[mid], numJ.value[uid]))
         yield (id, ret)
 
-    def calRMSEByPartition(id, iterator):
-        """
-        Show status of each worker in current strata.
-        """
-        RMSE = 0.0
-        for elem in iterator:
-            if elem[1] in bUserIndex.value[curStrata[id]]:  #### only consider those data in this strata.
-                mid = elem[0]
-                uid = elem[1]
-                rating = elem[2]
-                predict = wk[mid].dot(hk[uid])
-                RMSE += (rating - predict)**2
-        yield (id, RMSE)
-
     def calRMSE(elem):
         """
-        Show status of each worker in current strata.
+        Calculate RMSE for debug.
         """
         RMSE = 0.0
         mid = elem[0]
@@ -191,7 +116,7 @@ def main():
 
     def showRMSE(elem):
         """
-        Show status of each worker in current strata.
+        Show info about RMSE for debug.
         """
         RMSE = 0.0
         mid = elem[0]
@@ -225,13 +150,11 @@ def main():
                 hGrad[uid] -= epsilon*tmph
                 mbi += 1
         yield (id, [wGrad, hGrad, mbi])
-        #yield (id, [wGrad, hGrad, mbi])
 
     #### Ininialize W and H matrix. ####
     global wk, hk
     wk = dict()
     hk = dict()
-
     for mid in movieIndex:
         wk[mid] = np.random.random(numFactor)
     for uid in userIndex:
@@ -271,7 +194,7 @@ if __name__ == "__main__":
     outputWpath = sys.argv[7]
     outputHpath = sys.argv[8]
 
-#sc = SparkContext('local', 'pyspark')
+    ### Initialize SparkContext
     setting = 'local[%d]' % numWorker
     sc = SparkContext(setting, 'pyspark')
     main()
